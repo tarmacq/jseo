@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 420" role="img" aria-label="JSEO, Journee scientifique Ecosystemes d'optimisation">
+  <defs>
+    <path id="jseoArc" d="M 63.5 256.4 A 170 170 0 1 1 376.5 256.4" fill="none"/>
+  </defs>
+
+  <rect width="440" height="420" rx="16" fill="#0F2557"/>
+
+  <!-- outer rails -->
+  <path d="M 42 190 A 178 178 0 0 0 83.7 304.4" fill="none" stroke="#FFFFFF" stroke-opacity=".5" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M 398 190 A 178 178 0 0 1 356.3 304.4" fill="none" stroke="#FFFFFF" stroke-opacity=".5" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="42" cy="190" r="6" fill="#F2B417"/>
+  <circle cx="398" cy="190" r="6" fill="#F2B417"/>
+
+  <!-- curved title -->
+  <text fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" letter-spacing="4.2">
+    <textPath href="#jseoArc" startOffset="50%" text-anchor="middle">JOURNÉE SCIENTIFIQUE</textPath>
+  </text>
+
+  <!-- inner ring, broken at each node -->
+  <g fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round">
+    <path d="M 187.9 99.5 A 96 96 0 0 0 125.6 207.5"/>
+    <path d="M 252.1 99.5 A 96 96 0 0 1 314.4 207.5"/>
+    <path d="M 157.7 263 A 96 96 0 0 0 282.3 263"/>
+  </g>
+
+  <!-- spokes -->
+  <g stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round">
+    <line x1="220" y1="146" x2="220" y2="126"/>
+    <line x1="181.9" y1="212" x2="164.6" y2="222"/>
+    <line x1="258.1" y1="212" x2="275.4" y2="222"/>
+  </g>
+
+  <!-- node: summit -->
+  <circle cx="220" cy="94" r="32" fill="#FFFFFF"/>
+  <path d="M 202 104 L 213 87 L 220 96 L 230 80 L 241 104" fill="none" stroke="#0F2557" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- node: network -->
+  <circle cx="136.9" cy="238" r="32" fill="#FFFFFF"/>
+  <g stroke="#0F2557" stroke-width="4" stroke-linecap="round">
+    <line x1="122" y1="245" x2="137" y2="227"/>
+    <line x1="137" y1="227" x2="152" y2="242"/>
+    <line x1="122" y1="245" x2="152" y2="242"/>
+    <line x1="152" y1="242" x2="155" y2="254"/>
+  </g>
+  <g fill="#0F2557">
+    <circle cx="121" cy="246" r="6.5"/>
+    <circle cx="137" cy="226" r="6.5"/>
+    <circle cx="152" cy="241" r="6.5"/>
+    <circle cx="156" cy="255" r="5"/>
+  </g>
+
+  <!-- node: branching -->
+  <circle cx="303.1" cy="238" r="32" fill="#FFFFFF"/>
+  <g stroke="#0F2557" stroke-width="4" stroke-linecap="round">
+    <line x1="289" y1="238" x2="315" y2="223"/>
+    <line x1="289" y1="238" x2="315" y2="238"/>
+    <line x1="289" y1="238" x2="315" y2="253"/>
+  </g>
+  <g fill="#0F2557">
+    <circle cx="288" cy="238" r="6.5"/>
+    <circle cx="317" cy="222" r="6.5"/>
+    <circle cx="317" cy="238" r="6.5"/>
+    <circle cx="317" cy="254" r="6.5"/>
+  </g>
+
+  <!-- core -->
+  <circle cx="220" cy="190" r="42" fill="#0F2557" stroke="#FFFFFF" stroke-width="3.5"/>
+  <g fill="#FFFFFF">
+    <rect x="214" y="152" width="12" height="14" rx="2.5"/>
+    <rect x="214" y="152" width="12" height="14" rx="2.5" transform="rotate(45 220 190)"/>
+    <rect x="214" y="152" width="12" height="14" rx="2.5" transform="rotate(90 220 190)"/>
+    <rect x="214" y="152" width="12" height="14" rx="2.5" transform="rotate(135 220 190)"/>
+    <rect x="214" y="152" width="12" height="14" rx="2.5" transform="rotate(180 220 190)"/>
+    <rect x="214" y="152" width="12" height="14" rx="2.5" transform="rotate(225 220 190)"/>
+    <rect x="214" y="152" width="12" height="14" rx="2.5" transform="rotate(270 220 190)"/>
+    <rect x="214" y="152" width="12" height="14" rx="2.5" transform="rotate(315 220 190)"/>
+  </g>
+  <circle cx="220" cy="190" r="24" fill="none" stroke="#FFFFFF" stroke-width="9"/>
+  <circle cx="220" cy="190" r="8.5" fill="#0F2557"/>
+
+  <!-- wordmark -->
+  <text x="220" y="347" fill="#FFFFFF" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="43" font-weight="700" letter-spacing="0.5">ÉCOSYSTÈMES</text>
+  <text x="220" y="388" fill="#FFFFFF" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" letter-spacing="2">D&#8217;OPTIMISATION</text>
+
+  <g stroke="#FFFFFF" stroke-opacity=".5" stroke-width="2.5" stroke-linecap="round">
+    <line x1="150" y1="405" x2="203" y2="405"/>
+    <line x1="237" y1="405" x2="290" y2="405"/>
+  </g>
+  <circle cx="220" cy="405" r="5.5" fill="#F2B417"/>
+</svg>

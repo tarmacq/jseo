@@ -1,0 +1,17 @@
+{
+  "name": "jseo-2026",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Site de la Journee scientifique des ecosystemes d'optimisation, USTHB Alger, 22 octobre 2026",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "busboy": "^1.6.0",
+    "nodemailer": "^6.9.14"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

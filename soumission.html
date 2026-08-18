@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Soumettre un résumé | JSEO 2026</title>
+<meta name="description" content="Formulaire de soumission des résumés pour la Journée scientifique des écosystèmes d'optimisation, USTHB, Alger.">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Aller au contenu</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <img src="assets/img/logo-jseo.svg" alt="">
+      <span class="brand-text">
+        <span class="brand-name">JSEO 2026</span>
+        <span class="brand-sub">Écosystèmes d'optimisation</span>
+      </span>
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Ouvrir le menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <nav class="nav" id="site-nav" aria-label="Navigation principale">
+      <a href="index.html">Accueil</a>
+      <a href="appel.html">Appel à communication</a>
+      <a href="infos.html">Informations</a>
+      <a class="btn btn--primary" href="soumission.html" aria-current="page">Soumettre un résumé</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <div class="page-head">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Fil d'Ariane">
+        <a href="index.html">Accueil</a><span>/</span>Soumission
+      </nav>
+      <h1>Soumettre un résumé</h1>
+      <p>Déposez votre résumé et les informations de votre communication. Vous recevrez une confirmation par courriel dès la réception du dossier par le comité.</p>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="wrap form-layout">
+
+      <div>
+
+        <!-- Success -->
+        <div class="success" id="success-panel" tabindex="-1">
+          <div class="success-mark" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <h2>Soumission enregistrée</h2>
+          <p class="lead">Votre résumé est bien parvenu au comité d'organisation de la JSEO 2026.</p>
+          <p>Un accusé de réception vient d'être envoyé à l'adresse <strong id="success-email">votre adresse</strong>. Si vous ne le trouvez pas, pensez à vérifier le dossier des courriers indésirables.</p>
+          <p class="mt-3"><span class="lbl">Référence de votre soumission</span></p>
+          <p><span class="ref-code" id="success-ref">JSEO-0000</span></p>
+          <p class="mt-3">Conservez cette référence pour tout échange avec le comité. La notification aux auteurs est prévue le 10 octobre 2026.</p>
+          <p class="mt-4"><a class="btn btn--ghost" href="index.html">Retour à l'accueil</a></p>
+        </div>
+
+        <!-- Auth gate -->
+        <div class="gate" id="auth-gate" aria-live="polite">
+          <div class="gate-state" id="gate-loading">
+            <span class="spinner spinner--ink" aria-hidden="true"></span>
+            <p class="mb-0">Vérification de votre session.</p>
+          </div>
+
+          <div class="gate-state" id="gate-anonymous" hidden>
+            <svg class="gate-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <h2>Connectez-vous pour soumettre</h2>
+            <p>Les soumissions sont réservées aux comptes Tarmacq. La connexion nous permet de rattacher votre résumé à une adresse vérifiée et de vous recontacter de façon fiable.</p>
+            <p class="mt-3">
+              <button class="btn btn--primary" type="button" id="gate-login">Se connecter avec Tarmacq</button>
+            </p>
+            <p class="gate-note">Vous n'avez pas de compte ? La page de connexion permet d'en créer un.</p>
+          </div>
+
+          <div class="gate-state" id="gate-error" hidden>
+            <h2>Connexion indisponible</h2>
+            <p>Le service d'authentification ne répond pas pour le moment, la soumission est donc momentanément fermée.</p>
+            <p class="mt-3">Réessayez dans quelques minutes, ou écrivez au comité à <a href="mailto:jseo.metaheuristiques2026@gmail.com">jseo.metaheuristiques2026@gmail.com</a>.</p>
+            <p class="mt-3"><button class="btn btn--ghost" type="button" id="gate-retry">Réessayer</button></p>
+          </div>
+        </div>
+
+        <!-- Form -->
+        <div id="form-wrap" hidden>
+
+          <div class="signed-in" id="signed-in">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span>Connecté en tant que <strong id="signed-in-email"></strong></span>
+            <button type="button" id="gate-logout">Se déconnecter</button>
+          </div>
+
+
+          <div class="form-status" id="form-status" role="alert" aria-live="polite"></div>
+
+          <form id="submission-form" novalidate>
+
+            <fieldset class="fieldset">
+              <legend><span class="legend-step">01</span>Auteur correspondant</legend>
+
+              <div class="field-row">
+                <div class="field">
+                  <label for="lastName">Nom<span class="req">*</span></label>
+                  <input type="text" id="lastName" name="lastName" autocomplete="family-name" required>
+                  <span class="err" data-err-for="lastName"></span>
+                </div>
+                <div class="field">
+                  <label for="firstName">Prénom<span class="req">*</span></label>
+                  <input type="text" id="firstName" name="firstName" autocomplete="given-name" required>
+                  <span class="err" data-err-for="firstName"></span>
+                </div>
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label for="email">Adresse e-mail<span class="req">*</span></label>
+                  <input type="email" id="email" name="email" autocomplete="email" required readonly>
+                  <span class="hint">Adresse de votre compte Tarmacq. L'accusé de réception et la notification y seront envoyés.</span>
+                  <span class="err" data-err-for="email"></span>
+                </div>
+                <div class="field">
+                  <label for="phone">Téléphone</label>
+                  <input type="tel" id="phone" name="phone" autocomplete="tel">
+                  <span class="hint">Facultatif.</span>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="status">Statut<span class="req">*</span></label>
+                <select id="status" name="status" required>
+                  <option value="">Sélectionnez votre statut</option>
+                  <option>Mastérant</option>
+                  <option>Doctorant</option>
+                  <option>Chercheur</option>
+                  <option>Enseignant-chercheur</option>
+                  <option>Ingénieur en entreprise</option>
+                  <option>Industriel</option>
+                  <option>Autre</option>
+                </select>
+                <span class="err" data-err-for="status"></span>
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label for="institution">Établissement ou entreprise<span class="req">*</span></label>
+                  <input type="text" id="institution" name="institution" required>
+                  <span class="err" data-err-for="institution"></span>
+                </div>
+                <div class="field">
+                  <label for="lab">Laboratoire ou département</label>
+                  <input type="text" id="lab" name="lab">
+                  <span class="hint">Facultatif.</span>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="fieldset">
+              <legend><span class="legend-step">02</span>La communication</legend>
+
+              <div class="field">
+                <label for="title">Titre de la communication<span class="req">*</span></label>
+                <input type="text" id="title" name="title" required>
+                <span class="err" data-err-for="title"></span>
+              </div>
+
+              <div class="field">
+                <label for="coauthors">Co-auteurs</label>
+                <textarea id="coauthors" name="coauthors" rows="3" class="textarea--short"></textarea>
+                <span class="hint">Un co-auteur par ligne, sous la forme : Nom Prénom, affiliation. Laissez vide si vous êtes seul auteur.</span>
+              </div>
+
+              <div class="field">
+                <label for="axis">Axe thématique<span class="req">*</span></label>
+                <select id="axis" name="axis" required>
+                  <option value="">Sélectionnez un axe</option>
+                  <option>Axe 1. Hybridation intelligente des méthodes</option>
+                  <option>Axe 2. Coopération et collaboration intelligentes</option>
+                  <option>Axe 3. Apprentissage, adaptation et intelligence des écosystèmes</option>
+                  <option>Axe 4. Optimisation intelligente au service du réel</option>
+                  <option>Hors axes, contribution interdisciplinaire</option>
+                </select>
+                <span class="hint">Les axes sont indicatifs. <a href="appel.html#axes">Consulter le détail des axes</a>.</span>
+                <span class="err" data-err-for="axis"></span>
+              </div>
+
+              <div class="field">
+                <span class="lbl">Type de présentation<span class="req">*</span></span>
+                <div class="choice-grid">
+                  <label class="choice">
+                    <input type="radio" name="presentation" value="Communication orale" required>
+                    <span>
+                      <span class="choice-label">Communication orale</span>
+                      <span class="choice-desc">Présentation en séance plénière ou en atelier</span>
+                    </span>
+                  </label>
+                  <label class="choice">
+                    <input type="radio" name="presentation" value="Poster">
+                    <span>
+                      <span class="choice-label">Poster</span>
+                      <span class="choice-desc">Affichage et échanges durant les pauses</span>
+                    </span>
+                  </label>
+                </div>
+                <span class="err" data-err-for="presentation"></span>
+              </div>
+
+              <div class="field">
+                <span class="lbl">Langue de la communication<span class="req">*</span></span>
+                <div class="choice-grid">
+                  <label class="choice">
+                    <input type="radio" name="language" value="Français" required>
+                    <span><span class="choice-label">Français</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="radio" name="language" value="Anglais">
+                    <span><span class="choice-label">Anglais</span></span>
+                  </label>
+                </div>
+                <span class="err" data-err-for="language"></span>
+              </div>
+
+              <div class="field">
+                <label for="keywords">Mots-clés<span class="req">*</span></label>
+                <input type="text" id="keywords" name="keywords" required placeholder="hybridation, recherche tabou, ordonnancement">
+                <span class="hint">Trois à cinq mots-clés, séparés par des virgules.</span>
+                <span class="err" data-err-for="keywords"></span>
+              </div>
+
+              <div class="field">
+                <label for="abstract">
+                  Résumé<span class="req">*</span>
+                  <span class="counter"><span id="abstract-count">0</span> / 2500</span>
+                </label>
+                <textarea id="abstract" name="abstract" maxlength="2500" required></textarea>
+                <span class="hint">Entre 200 et 2500 caractères. Présentez le problème traité, l'approche proposée et les principaux résultats.</span>
+                <span class="err" data-err-for="abstract"></span>
+              </div>
+            </fieldset>
+
+            <fieldset class="fieldset">
+              <legend><span class="legend-step">03</span>Le document</legend>
+
+              <div class="field">
+                <span class="lbl">Résumé au format du modèle<span class="req">*</span></span>
+                <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-controls="file" aria-describedby="dz-help">
+                  <svg class="dz-icon" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 9 5-5 5 5"/><path d="M12 4v12"/></svg>
+                  <div class="dz-main">Déposez votre fichier ici ou <u>parcourez vos documents</u></div>
+                  <div class="dz-sub" id="dz-help">PDF, DOC ou DOCX, 10 Mo au maximum</div>
+                  <input type="file" id="file" name="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required>
+                </div>
+                <div class="file-chip" id="file-chip">
+                  <svg class="fc-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
+                  <span class="fc-meta">
+                    <span class="fc-name" id="fc-name"></span>
+                    <span class="fc-size" id="fc-size"></span>
+                  </span>
+                  <button type="button" id="fc-remove">Retirer</button>
+                </div>
+                <span class="err" data-err-for="file"></span>
+              </div>
+            </fieldset>
+
+            <fieldset class="fieldset">
+              <legend><span class="legend-step">04</span>Validation</legend>
+
+              <div class="field">
+                <label class="consent">
+                  <input type="checkbox" id="consent" name="consent" required>
+                  <span>J'autorise le comité d'organisation de la JSEO à utiliser les informations transmises pour l'évaluation de ma soumission et l'organisation de la journée.<span class="req">*</span></span>
+                </label>
+                <span class="err" data-err-for="consent"></span>
+              </div>
+
+              <div class="field">
+                <span class="lbl">Vérification de sécurité<span class="req">*</span></span>
+                <div class="cf-turnstile" data-sitekey="0x4AAAAAAEUe1CkVydD2ZPcc" data-language="fr" data-theme="light" data-appearance="always"></div>
+                <span class="hint">Cette étape confirme que la soumission provient bien d'une personne.</span>
+                <span class="err" data-err-for="captcha"></span>
+              </div>
+
+              <div class="field sr-only" aria-hidden="true">
+                <label for="website">Ne remplissez pas ce champ</label>
+                <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+              </div>
+            </fieldset>
+
+            <div class="form-submit">
+              <button class="btn btn--primary" type="submit" id="submit-btn">Envoyer ma soumission</button>
+              <span class="note">Les champs marqués d'un astérisque sont obligatoires. Date limite : 10 octobre 2026.</span>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+      <aside>
+        <div class="aside-box aside-box--navy">
+          <h3>Dates importantes</h3>
+          <ul>
+            <li><strong>Date limite de soumission</strong>10 octobre 2026</li>
+            <li><strong>Notification aux auteurs</strong>10 octobre 2026</li>
+            <li><strong>Journée scientifique</strong>22 octobre 2026</li>
+          </ul>
+        </div>
+
+        <div class="aside-box">
+          <h3>Avant d'envoyer</h3>
+          <ul>
+            <li>Votre résumé suit le modèle fourni avec l'appel à communication.</li>
+            <li>Le titre et les noms des co-auteurs sont définitifs.</li>
+            <li>Le fichier est lisible et ne dépasse pas 10 Mo.</li>
+            <li>L'adresse e-mail saisie est celle que vous consultez.</li>
+          </ul>
+        </div>
+
+        <div class="aside-box">
+          <h3>Besoin d'aide ?</h3>
+          <ul>
+            <li>Pour toute difficulté avec le formulaire, écrivez au comité.<br><a href="mailto:jseo.metaheuristiques2026@gmail.com">jseo.metaheuristiques2026@gmail.com</a></li>
+          </ul>
+        </div>
+      </aside>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="assets/img/logo-jseo.svg" alt="">
+          <span>
+            <span class="f-name">JSEO 2026</span><br>
+            <span class="f-sub">Écosystèmes d'optimisation</span>
+          </span>
+        </div>
+        <p>Journée scientifique organisée par la Faculté de Mathématiques de l'USTHB, Alger, autour de l'hybridation, de la collaboration et de la coopération intelligentes des métaheuristiques.</p>
+      </div>
+      <div>
+        <h4>Navigation</h4>
+        <ul>
+          <li><a href="index.html">Accueil</a></li>
+          <li><a href="appel.html">Appel à communication</a></li>
+          <li><a href="appel.html#axes">Axes thématiques</a></li>
+          <li><a href="infos.html">Informations pratiques</a></li>
+          <li><a href="soumission.html">Soumettre un résumé</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="mailto:jseo.metaheuristiques2026@gmail.com">jseo.metaheuristiques2026<br>@gmail.com</a></li>
+          <li>Faculté de Mathématiques<br>USTHB, Bab Ezzouar, Alger</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; <span data-year>2026</span> JSEO, Faculté de Mathématiques, USTHB.</span>
+      <span>Site conçu par <a href="https://www.tarmacq.com" target="_blank" rel="noopener">Tarmacq Agency</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/form.js"></script>
+</body>
+</html>
