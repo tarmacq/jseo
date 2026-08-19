@@ -23,15 +23,17 @@ const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY;
 const TURNSTILE_VERIFY = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
 const MAX_BYTES = 10 * 1024 * 1024;
-const ALLOWED_EXT = ['pdf', 'doc', 'docx'];
-const ABSTRACT_MIN = 200;
+const ALLOWED_EXT = ['pdf', 'docx'];
+const ABSTRACT_MIN_WORDS = 250;
+const ABSTRACT_MAX_WORDS = 400;
 
 const EVENT = {
   name: 'JSEO 2026',
   longName: "Journée scientifique des écosystèmes d'optimisation",
   date: '22 octobre 2026',
   place: 'Faculté de Mathématiques, USTHB, Alger',
-  notification: '10 octobre 2026'
+  notification: '15 octobre 2026',
+  deadline: '12 octobre 2026'
 };
 
 /* --------------------------------------------------------------- parsing */
@@ -102,6 +104,11 @@ function extensionOf(name) {
   return i === -1 ? '' : name.slice(i + 1).toLowerCase();
 }
 
+function countWords(text) {
+  const trimmed = String(text || '').trim();
+  return trimmed ? trimmed.split(/\s+/).length : 0;
+}
+
 function validate(fields, file) {
   const need = (key) => String(fields[key] || '').trim();
 
@@ -114,21 +121,29 @@ function validate(fields, file) {
   if (need('institution').length < 2) return "L'établissement ou l'entreprise est manquant.";
   if (need('title').length < 5) return 'Le titre de la communication est manquant.';
   if (!need('axis')) return "L'axe thématique est manquant.";
+  if (need('axis') === 'Autre' && !need('axisOther')) {
+    return 'Précisez la thématique de votre contribution.';
+  }
   if (!need('presentation')) return 'Le type de présentation est manquant.';
   if (!need('language')) return 'La langue de la communication est manquante.';
 
-  const keywords = need('keywords').split(',').map((s) => s.trim()).filter(Boolean);
-  if (keywords.length < 3) return 'Indiquez au moins trois mots-clés.';
+  const keywords = need('keywords').split(';').map((s) => s.trim()).filter(Boolean);
+  if (keywords.length < 3) return 'Indiquez au moins trois mots-clés séparés par des points-virgules.';
+  if (keywords.length > 5) return 'Cinq mots-clés au maximum.';
 
-  if (need('abstract').length < ABSTRACT_MIN) {
-    return `Le résumé doit compter au moins ${ABSTRACT_MIN} caractères.`;
+  const words = countWords(need('abstract'));
+  if (words < ABSTRACT_MIN_WORDS) {
+    return `Le résumé doit compter au moins ${ABSTRACT_MIN_WORDS} mots (${words} actuellement).`;
+  }
+  if (words > ABSTRACT_MAX_WORDS) {
+    return `Le résumé ne doit pas dépasser ${ABSTRACT_MAX_WORDS} mots (${words} actuellement).`;
   }
 
   if (!need('consent')) return 'Votre accord est nécessaire pour enregistrer la soumission.';
 
   if (!file) return 'Le fichier du résumé est manquant.';
   if (ALLOWED_EXT.indexOf(extensionOf(file.filename)) === -1) {
-    return 'Format de fichier non accepté. Déposez un PDF, DOC ou DOCX.';
+    return 'Format de fichier non accepté. Déposez un PDF ou un DOCX.';
   }
   if (file.size > MAX_BYTES) return 'Le fichier dépasse la limite de 10 Mo.';
 
@@ -296,7 +311,7 @@ function authorHtml(f, reference) {
       ${row('Langue', escapeHtml(f.language))}
     </table>
 
-    <p style="margin:0 0 16px;">La notification aux auteurs est prévue le <strong>${escapeHtml(EVENT.notification)}</strong>. Conservez la référence ci-dessus pour tout échange avec le comité.</p>
+    <p style="margin:0 0 16px;">La notification d'acceptation est prévue le <strong>${escapeHtml(EVENT.notification)}</strong>. Conservez la référence ci-dessus pour tout échange avec le comité.</p>
 
     <p style="margin:0 0 16px;">La journée se tiendra le <strong>${escapeHtml(EVENT.date)}</strong> à la ${escapeHtml(EVENT.place)}.</p>
 
@@ -321,7 +336,7 @@ function authorText(f, reference) {
     `Présentation : ${f.presentation}`,
     `Langue : ${f.language}`,
     '',
-    `Notification aux auteurs : ${EVENT.notification}`,
+    `Notification d'acceptation : ${EVENT.notification}`,
     `Journée scientifique : ${EVENT.date}, ${EVENT.place}`,
     '',
     'Le comité d\'organisation de la JSEO 2026',
@@ -340,16 +355,9 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  if (!MAIL_USER || !MAIL_PASS) {
-    console.error('JSEO_MAIL_USER / JSEO_MAIL_PASS are not configured.');
-    res.status(500).json({
-      error: "Le service d'envoi n'est pas configuré. Écrivez directement à " + STAFF_EMAIL + '.'
-    });
-    return;
-  }
-
+  // Supabase comes first because verifying the caller depends on it.
   if (!supabase.isConfigured()) {
-    console.error('SUPABASE_URL / SUPABASE_ANON_KEY / SUPABASE_SERVICE_ROLE_KEY are not configured.');
+    console.error('Missing environment variables:', supabase.missingConfig().join(', '));
     res.status(500).json({ error: "L'authentification n'est pas configurée sur le serveur." });
     return;
   }
@@ -369,6 +377,23 @@ module.exports = async function handler(req, res) {
 
   if (!user) {
     res.status(401).json({ error: 'Votre session a expiré. Reconnectez-vous pour soumettre.' });
+    return;
+  }
+
+  // Every remaining server setting is reported at once, so a misconfigured
+  // deployment is fixed in a single pass rather than one redeploy per
+  // variable. Named only for a caller who has already proven who they are.
+  const missing = [];
+  if (!MAIL_USER) missing.push('JSEO_MAIL_USER');
+  if (!MAIL_PASS) missing.push('JSEO_MAIL_PASS');
+  if (!TURNSTILE_SECRET) missing.push('TURNSTILE_SECRET_KEY');
+
+  if (missing.length) {
+    console.error('Missing environment variables:', missing.join(', '));
+    res.status(500).json({
+      error: 'Le serveur est incomplètement configuré (' + missing.join(', ') +
+        '). Écrivez au comité à ' + STAFF_EMAIL + '.'
+    });
     return;
   }
 
@@ -398,12 +423,6 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  if (!TURNSTILE_SECRET) {
-    console.error('TURNSTILE_SECRET_KEY is not configured.');
-    res.status(500).json({ error: "La vérification de sécurité n'est pas configurée sur le serveur." });
-    return;
-  }
-
   const captcha = await verifyTurnstile(fields['cf-turnstile-response'], req);
   if (!captcha.ok) {
     res.status(captcha.reason === 'unreachable' ? 503 : 400).json({
@@ -412,6 +431,12 @@ module.exports = async function handler(req, res) {
         : 'La vérification de sécurité a échoué. Rechargez la page et réessayez.'
     });
     return;
+  }
+
+  // Fold the free-text thematic area into the axis so a single column, and a
+  // single line in both emails, carries the whole answer.
+  if (fields.axis === 'Autre' && fields.axisOther) {
+    fields.axis = 'Autre : ' + fields.axisOther;
   }
 
   const reference = makeReference();

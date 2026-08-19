@@ -16,7 +16,7 @@ de confirmation.
 ```
 index.html          Accueil
 appel.html          Appel à communication et les quatre axes
-infos.html          Dates, comités, informations pratiques
+infos.html          Dates, lieu, informations pratiques
 soumission.html     Formulaire de soumission
 
 assets/css/style.css    Feuille de style unique
@@ -97,8 +97,17 @@ est déjà exclu par `.gitignore`.
 1. Dans le SQL editor du projet, exécutez `supabase/schema.sql`. Il crée la
    table `jseo_submissions`, ses index, la RLS et le bucket privé
    `jseo-resumes`.
-2. Relevez dans **Settings, API** : l'URL du projet, la clé `anon` et la clé
+2. Relevez dans **Settings, API** : l'URL du projet, la clé publique et la clé
    `service_role`. Reportez-les dans `.env`.
+
+Le projet utilise les clés de nouvelle génération : la clé publique servie par
+`api.tarmacq.com` est de la forme `sb_publishable_...` et non un JWT `eyJ...`.
+Cela ne change rien au code, elle est transmise telle quelle dans l'en-tête
+`apikey`.
+
+Tant que `schema.sql` n'a pas été exécuté, `/rest/v1/jseo_submissions` répond
+404 et toute soumission repart avec `stored: false` : les courriels partent
+quand même, avec un avertissement visible dans celui du comité.
 
 Deux règles à ne pas contourner :
 
@@ -120,28 +129,51 @@ clé secrète dans `TURNSTILE_SECRET_KEY`.
 `assets/js/auth.js` regroupe les deux points d'entrée :
 
 ```js
-var CONFIG_URL = 'https://api.tarmacq.com/api/config.js';
-var AUTH_URL   = 'https://auth.tarmacq.com/dist/services/jseo';
+var CONFIG_URL = 'https://api.tarmacq.com/api/config';   // sans .js
+var AUTH_URL   = window.JSEO_AUTH_URL || 'https://auth.tarmacq.com/distribution/services/jseo';
 ```
 
-Le chargement de la config essaie, dans l'ordre : une balise `<script>` puis
-lecture d'un global (`TARMACQ_CONFIG`, `SUPABASE_CONFIG`, `APP_CONFIG`,
-`CONFIG`...), sinon `fetch` et `JSON.parse`, sinon extraction de l'URL et de
-la clé dans le texte. **Si le nom réel du global ou la forme de la réponse
-diffère, ajoutez-le à `GLOBALS` / `URL_KEYS` / `KEY_KEYS` en haut du
-fichier.** Pour court-circuiter entièrement la découverte, définissez avant
-le script :
+**L'URL de config ne porte pas l'extension `.js`.** Vercel répond à
+`/api/config.js` par une redirection 308 vers `/api/config`, et une réponse de
+redirection ne porte pas d'en-tête `Access-Control-Allow-Origin` : le
+navigateur rejette donc la requête sur la politique CORS avant même
+d'atteindre le handler. Vérifié :
+
+```
+GET /api/config.js   Origin: https://jseo.tarmacq.com   ->  308, pas d'ACAO
+GET /api/config      Origin: https://jseo.tarmacq.com   ->  200, ACAO correct
+GET /api/config      sans Origin                        ->  403
+```
+
+La config est lue par `fetch` et `JSON.parse`, jamais par une balise
+`<script>` : une balise script classique n'envoie pas d'en-tête `Origin` et
+tombe systématiquement sur la branche 403 de votre handler. Les clés lues sont
+`supabaseUrl` et `supabaseKey`, telles que servies. Pour court-circuiter
+l'appel réseau, définissez avant le script :
 
 ```html
-<script>window.JSEO_SUPABASE = { supabaseUrl: '...', supabaseAnonKey: '...' };</script>
+<script>window.JSEO_SUPABASE = { supabaseUrl: '...', supabaseKey: '...' };</script>
 ```
 
-Pour la connexion, l'utilisateur est envoyé sur `AUTH_URL` avec
-`redirect_uri`, `redirect` et `service=jseo`, et le retour est attendu sous la
-forme `...soumission.html#access_token=...` (le paramètre est aussi accepté en
-query, et sous le nom `token`). Le jeton est retiré de l'URL dès sa lecture et
-conservé en `sessionStorage`. **Si votre service utilise d'autres noms de
-paramètres, ajustez `login()` et `readParams()`.**
+### L'URL de connexion
+
+`login()` envoie l'utilisateur sur :
+
+```
+https://auth.tarmacq.com/distribution/services/jseo?service=jseo&redirect_uri=<retour>&redirect=<retour>
+```
+
+Le chemin peut être remplacé sans toucher au code, en le déclarant avant le
+script :
+
+```html
+<script>window.JSEO_AUTH_URL = 'https://auth.tarmacq.com/un-autre-chemin';</script>
+```
+
+Le retour est attendu sous la forme `...soumission.html#access_token=...` (le
+paramètre est aussi accepté en query, et sous le nom `token`). Le jeton est
+retiré de l'URL dès sa lecture et conservé en `sessionStorage`. Si vos noms de
+paramètres diffèrent, ajustez `login()` et `readParams()`.
 
 ---
 
@@ -186,6 +218,10 @@ ajoutez pour l'environnement Production :
 | `SUPABASE_URL` | l URL du projet Supabase |
 | `SUPABASE_ANON_KEY` | la clé anon |
 | `SUPABASE_SERVICE_ROLE_KEY` | la clé service_role |
+
+Toutes ces variables doivent être présentes. Si l'une manque, la page de
+soumission affiche désormais la liste exacte des variables absentes plutôt
+qu'une erreur générique.
 
 Puis redéployez :
 
@@ -242,18 +278,16 @@ validation dans le navigateur et sur le serveur, limite de 10 Mo, extensions
 Les emplacements sont signalés dans les pages par une étiquette orange
 « À compléter ».
 
-- `infos.html` : membres du comité scientifique et du comité d'organisation,
-  salle exacte, format présentiel ou hybride, adresse du site une fois en
-  ligne.
-- `appel.html` : lien vers le modèle de résumé. Déposez le document dans
-  `assets/docs/` puis remplacez l'étiquette par un lien.
+- `infos.html` : salle exacte et format présentiel ou hybride.
 
-Deux points relevés dans les documents source, à trancher de votre côté :
+Les comités scientifique et d'organisation ne figurent plus sur le site, à la
+demande du comité. Le balisage `.people` reste disponible dans la feuille de
+style si ces sections doivent revenir.
 
-- La **date limite de soumission et la notification aux auteurs portent toutes
-  deux le 10 octobre 2026**. Les pages reprennent cette date telle quelle.
-- La phrase « **Adaptée** isolément, une métaheuristique... » est reprise mot
-  pour mot de l'appel. « Appliquée » était peut-être l'intention.
+Un point relevé dans les documents source : les consignes du modèle de résumé
+annoncent une **date limite d'envoi au 30 septembre 2026**, alors que la
+section « Dates importantes » du même document indique le **12 octobre 2026**.
+Le site retient le 12 octobre. À corriger dans le modèle si besoin.
 
 ---
 

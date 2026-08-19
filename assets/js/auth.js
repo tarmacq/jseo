@@ -2,65 +2,38 @@
  * Tarmacq OAuth session for the JSEO submission page.
  *
  * Flow:
- *   1. Load the Supabase config served by api.tarmacq.com (origin allowlisted
- *      to the site domain, so this only resolves in the browser).
+ *   1. Read the Supabase config from api.tarmacq.com.
  *   2. Capture the access_token returned by auth.tarmacq.com after login.
  *   3. Resolve the token against Supabase Auth to obtain the verified user.
  *
- * The token is only ever a hint here. The API re-verifies it server side
- * before accepting a submission, so nothing in this file is a security
- * boundary.
+ * The token is only a hint here. The API re-verifies it server side before
+ * accepting a submission, so nothing in this file is a security boundary.
  */
 window.JSEOAuth = (function () {
   'use strict';
 
-  var CONFIG_URL = 'https://api.tarmacq.com/api/config.js';
-  var AUTH_URL = 'https://auth.tarmacq.com/dist/services/jseo';
+  // No .js suffix: Vercel's cleanUrls answers /api/config.js with a 308 to
+  // /api/config, and a redirect carries no Access-Control-Allow-Origin, so
+  // the browser fails the request on CORS before the handler ever runs.
+  var CONFIG_URL = 'https://api.tarmacq.com/api/config';
+
+  var AUTH_URL = window.JSEO_AUTH_URL || 'https://auth.tarmacq.com/distribution/services/jseo';
+  var SERVICE = 'jseo';
   var TOKEN_KEY = 'jseo.access_token';
 
   var state = { config: null, token: null, user: null };
 
   /* ------------------------------------------------------------- config */
 
-  // The endpoint is served as .js, so a script tag is the documented path.
-  // Different Tarmacq services expose it under different globals, so we look
-  // through the conventional names rather than hard-coding one.
-  var GLOBALS = ['TARMACQ_CONFIG', 'TarmacqConfig', 'SUPABASE_CONFIG', 'APP_CONFIG', 'CONFIG', 'config'];
-  var URL_KEYS = ['supabaseUrl', 'SUPABASE_URL', 'supabase_url', 'url'];
-  var KEY_KEYS = ['supabaseAnonKey', 'SUPABASE_ANON_KEY', 'supabase_anon_key', 'anonKey', 'anon_key', 'supabaseKey', 'key'];
-
-  function pick(obj, names) {
-    for (var i = 0; i < names.length; i++) {
-      if (obj && typeof obj[names[i]] === 'string' && obj[names[i]]) return obj[names[i]];
-    }
-    return null;
-  }
-
+  // The endpoint returns JSON and requires an Origin header on the allowlist,
+  // so it must be fetched, never loaded through a script tag (a classic
+  // script tag sends no Origin and is answered with 403).
   function normalise(raw) {
     if (!raw || typeof raw !== 'object') return null;
-    var nested = raw.supabase && typeof raw.supabase === 'object' ? raw.supabase : raw;
-    var url = pick(nested, URL_KEYS) || pick(raw, URL_KEYS);
-    var key = pick(nested, KEY_KEYS) || pick(raw, KEY_KEYS);
-    return url && key ? { url: url.replace(/\/$/, ''), key: key } : null;
-  }
-
-  function fromGlobals() {
-    for (var i = 0; i < GLOBALS.length; i++) {
-      var found = normalise(window[GLOBALS[i]]);
-      if (found) return found;
-    }
-    return null;
-  }
-
-  function loadScript(src) {
-    return new Promise(function (resolve, reject) {
-      var el = document.createElement('script');
-      el.src = src;
-      el.async = true;
-      el.onload = resolve;
-      el.onerror = function () { reject(new Error('config script failed')); };
-      document.head.appendChild(el);
-    });
+    var url = raw.supabaseUrl || raw.SUPABASE_URL || raw.url;
+    var key = raw.supabaseKey || raw.supabaseAnonKey || raw.SUPABASE_ANON_KEY || raw.anonKey;
+    if (!url || !key) return null;
+    return { url: String(url).replace(/\/$/, ''), key: String(key), extras: raw };
   }
 
   function loadConfig() {
@@ -72,31 +45,16 @@ window.JSEOAuth = (function () {
       return Promise.resolve(preset);
     }
 
-    return loadScript(CONFIG_URL)
-      .then(fromGlobals)
-      .catch(function () { return null; })
-      .then(function (found) {
-        if (found) return found;
-
-        // Fall back to reading it as data in case it is served as JSON.
-        return fetch(CONFIG_URL, { credentials: 'omit' })
-          .then(function (res) { return res.text(); })
-          .then(function (text) {
-            try {
-              return normalise(JSON.parse(text));
-            } catch (err) {
-              // Last resort: pull the two values out of the source text.
-              var url = text.match(/https:\/\/[a-z0-9-]+\.supabase\.co/i);
-              var key = text.match(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/);
-              return url && key ? { url: url[0], key: key[0] } : null;
-            }
-          })
-          .catch(function () { return null; });
+    return fetch(CONFIG_URL, { credentials: 'omit' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('CONFIG_' + res.status);
+        return res.json();
       })
-      .then(function (found) {
-        if (!found) throw new Error('CONFIG_UNAVAILABLE');
-        state.config = found;
-        return found;
+      .then(function (body) {
+        var config = normalise(body);
+        if (!config) throw new Error('CONFIG_SHAPE');
+        state.config = config;
+        return config;
       });
   }
 
@@ -143,7 +101,7 @@ window.JSEOAuth = (function () {
       headers: { apikey: config.key, Authorization: 'Bearer ' + token }
     }).then(function (res) {
       if (res.status === 401 || res.status === 403) return null;
-      if (!res.ok) throw new Error('AUTH_UNAVAILABLE');
+      if (!res.ok) throw new Error('AUTH_' + res.status);
       return res.json();
     });
   }
@@ -153,9 +111,10 @@ window.JSEOAuth = (function () {
   function login(returnTo) {
     var target = returnTo || (window.location.origin + window.location.pathname);
     var url = AUTH_URL +
-      '?redirect_uri=' + encodeURIComponent(target) +
-      '&redirect=' + encodeURIComponent(target) +
-      '&service=jseo';
+      (AUTH_URL.indexOf('?') === -1 ? '?' : '&') +
+      'service=' + encodeURIComponent(SERVICE) +
+      '&redirect_uri=' + encodeURIComponent(target) +
+      '&redirect=' + encodeURIComponent(target);
     window.location.assign(url);
   }
 
@@ -179,6 +138,7 @@ window.JSEOAuth = (function () {
         return { status: 'authenticated', user: user, token: token };
       });
     }).catch(function (err) {
+      console.error('JSEO auth:', err);
       return { status: 'error', reason: err.message };
     });
   }
@@ -187,6 +147,7 @@ window.JSEOAuth = (function () {
     init: init,
     login: login,
     logout: logout,
+    getConfig: function () { return state.config; },
     getToken: function () { return state.token; },
     getUser: function () { return state.user; }
   };

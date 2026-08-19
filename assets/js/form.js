@@ -5,8 +5,14 @@
   var ENDPOINT = window.JSEO_ENDPOINT || '/api/submit';
   var STAFF_EMAIL = 'jseo.metaheuristiques2026@gmail.com';
   var MAX_BYTES = 10 * 1024 * 1024;
-  var ALLOWED_EXT = ['pdf', 'doc', 'docx'];
-  var ABSTRACT_MIN = 200;
+  var ALLOWED_EXT = ['pdf', 'docx'];
+  var ABSTRACT_MIN_WORDS = 250;
+  var ABSTRACT_MAX_WORDS = 400;
+
+  function countWords(text) {
+    var trimmed = text.trim();
+    return trimmed ? trimmed.split(/\s+/).length : 0;
+  }
 
   var form = document.getElementById('submission-form');
   if (!form) return;
@@ -122,10 +128,28 @@
 
   if (abstractEl && abstractCount) {
     var updateCount = function () {
-      abstractCount.textContent = String(abstractEl.value.length);
+      var words = countWords(abstractEl.value);
+      abstractCount.textContent = String(words);
+      abstractCount.parentNode.classList.toggle(
+        'counter--over',
+        words > 0 && (words < ABSTRACT_MIN_WORDS || words > ABSTRACT_MAX_WORDS)
+      );
     };
     abstractEl.addEventListener('input', updateCount);
     updateCount();
+  }
+
+  /* ----------------------------------------------------------- axis "other" */
+
+  var axisEl = document.getElementById('axis');
+  var axisOtherField = document.getElementById('axis-other-field');
+
+  if (axisEl && axisOtherField) {
+    var syncAxis = function () {
+      axisOtherField.hidden = axisEl.value !== 'Autre';
+    };
+    axisEl.addEventListener('change', syncAxis);
+    syncAxis();
   }
 
   /* ----------------------------------------------------------- file handling */
@@ -146,7 +170,7 @@
     if (!file) return;
 
     if (ALLOWED_EXT.indexOf(extensionOf(file.name)) === -1) {
-      setError('file', 'Format non accepté. Déposez un fichier PDF, DOC ou DOCX.');
+      setError('file', 'Format non accepté. Déposez un fichier PDF ou DOCX.');
       return;
     }
     if (file.size > MAX_BYTES) {
@@ -220,12 +244,18 @@
     ['title', function (v) { return v.trim().length >= 5 || 'Indiquez le titre de votre communication.'; }],
     ['axis', function (v) { return !!v || 'Sélectionnez un axe thématique.'; }],
     ['keywords', function (v) {
-      var parts = v.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
-      return parts.length >= 3 || 'Indiquez au moins trois mots-clés séparés par des virgules.';
+      var parts = v.split(';').map(function (s) { return s.trim(); }).filter(Boolean);
+      if (parts.length < 3) return 'Indiquez au moins trois mots-clés séparés par des points-virgules.';
+      if (parts.length > 5) return 'Cinq mots-clés au maximum (' + parts.length + ' actuellement).';
+      return true;
     }],
     ['abstract', function (v) {
-      if (v.trim().length < ABSTRACT_MIN) {
-        return 'Le résumé doit compter au moins ' + ABSTRACT_MIN + ' caractères (' + v.trim().length + ' actuellement).';
+      var words = countWords(v);
+      if (words < ABSTRACT_MIN_WORDS) {
+        return 'Le résumé doit compter au moins ' + ABSTRACT_MIN_WORDS + ' mots (' + words + ' actuellement).';
+      }
+      if (words > ABSTRACT_MAX_WORDS) {
+        return 'Le résumé ne doit pas dépasser ' + ABSTRACT_MAX_WORDS + ' mots (' + words + ' actuellement).';
       }
       return true;
     }]
@@ -245,6 +275,11 @@
       }
     });
 
+    if (form.elements['axis'].value === 'Autre' && !form.elements['axisOther'].value.trim()) {
+      setError('axisOther', 'Précisez la thématique de votre contribution.');
+      if (!firstBad) firstBad = form.elements['axisOther'];
+    }
+
     if (!form.querySelector('input[name="presentation"]:checked')) {
       setError('presentation', 'Choisissez un type de présentation.');
       if (!firstBad) firstBad = form.elements['presentation'][0];
@@ -260,7 +295,7 @@
       setError('file', 'Déposez le fichier de votre résumé.');
       if (!firstBad) firstBad = dropzone;
     } else if (ALLOWED_EXT.indexOf(extensionOf(file.name)) === -1) {
-      setError('file', 'Format non accepté. Déposez un fichier PDF, DOC ou DOCX.');
+      setError('file', 'Format non accepté. Déposez un fichier PDF ou DOCX.');
       if (!firstBad) firstBad = dropzone;
     } else if (file.size > MAX_BYTES) {
       setError('file', 'Fichier trop volumineux. La limite est de 10 Mo.');

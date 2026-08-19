@@ -63,7 +63,7 @@
           <p>Un accusé de réception vient d'être envoyé à l'adresse <strong id="success-email">votre adresse</strong>. Si vous ne le trouvez pas, pensez à vérifier le dossier des courriers indésirables.</p>
           <p class="mt-3"><span class="lbl">Référence de votre soumission</span></p>
           <p><span class="ref-code" id="success-ref">JSEO-0000</span></p>
-          <p class="mt-3">Conservez cette référence pour tout échange avec le comité. La notification aux auteurs est prévue le 10 octobre 2026.</p>
+          <p class="mt-3">Conservez cette référence pour tout échange avec le comité. La notification d'acceptation aux auteurs est prévue le 15 octobre 2026.</p>
           <p class="mt-4"><a class="btn btn--ghost" href="index.html">Retour à l'accueil</a></p>
         </div>
 
@@ -184,14 +184,20 @@
                 <label for="axis">Axe thématique<span class="req">*</span></label>
                 <select id="axis" name="axis" required>
                   <option value="">Sélectionnez un axe</option>
-                  <option>Axe 1. Hybridation intelligente des méthodes</option>
-                  <option>Axe 2. Coopération et collaboration intelligentes</option>
-                  <option>Axe 3. Apprentissage, adaptation et intelligence des écosystèmes</option>
-                  <option>Axe 4. Optimisation intelligente au service du réel</option>
-                  <option>Hors axes, contribution interdisciplinaire</option>
+                  <option>Axe 1. Hybridation intelligente des méthodes d'optimisation</option>
+                  <option>Axe 2. Coopération et collaboration intelligentes (MetaStorming)</option>
+                  <option>Axe 3. Apprentissage, adaptation et intelligence des écosystèmes d'optimisation</option>
+                  <option>Axe 4. Optimisation et intelligence décisionnelle au service des applications industrielles et sociétales</option>
+                  <option value="Autre">Autre, à préciser</option>
                 </select>
-                <span class="hint">Les axes sont indicatifs. <a href="appel.html#axes">Consulter le détail des axes</a>.</span>
+                <span class="hint">Les axes sont indicatifs et non restrictifs. <a href="appel.html#axes">Consulter le détail des axes</a>.</span>
                 <span class="err" data-err-for="axis"></span>
+              </div>
+
+              <div class="field" id="axis-other-field" hidden>
+                <label for="axisOther">Précisez votre thématique<span class="req">*</span></label>
+                <input type="text" id="axisOther" name="axisOther">
+                <span class="err" data-err-for="axisOther"></span>
               </div>
 
               <div class="field">
@@ -232,18 +238,18 @@
 
               <div class="field">
                 <label for="keywords">Mots-clés<span class="req">*</span></label>
-                <input type="text" id="keywords" name="keywords" required placeholder="hybridation, recherche tabou, ordonnancement">
-                <span class="hint">Trois à cinq mots-clés, séparés par des virgules.</span>
+                <input type="text" id="keywords" name="keywords" required placeholder="Métaheuristiques ; Hybridation ; Écosystèmes algorithmiques">
+                <span class="hint">Trois à cinq mots-clés, séparés par des points-virgules.</span>
                 <span class="err" data-err-for="keywords"></span>
               </div>
 
               <div class="field">
                 <label for="abstract">
                   Résumé<span class="req">*</span>
-                  <span class="counter"><span id="abstract-count">0</span> / 2500</span>
+                  <span class="counter"><span id="abstract-count">0</span> mots</span>
                 </label>
-                <textarea id="abstract" name="abstract" maxlength="2500" required></textarea>
-                <span class="hint">Entre 200 et 2500 caractères. Présentez le problème traité, l'approche proposée et les principaux résultats.</span>
+                <textarea id="abstract" name="abstract" required></textarea>
+                <span class="hint">Entre 250 et 400 mots. Le résumé doit préciser le <strong>contexte</strong>, la <strong>problématique</strong>, la <strong>méthode</strong> proposée, les <strong>résultats</strong> attendus ou obtenus, et les <strong>perspectives</strong> de recherche.</span>
                 <span class="err" data-err-for="abstract"></span>
               </div>
             </fieldset>
@@ -252,12 +258,12 @@
               <legend><span class="legend-step">03</span>Le document</legend>
 
               <div class="field">
-                <span class="lbl">Résumé au format du modèle<span class="req">*</span></span>
+                <span class="lbl">Fichier du résumé<span class="req">*</span></span>
                 <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-controls="file" aria-describedby="dz-help">
                   <svg class="dz-icon" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 9 5-5 5 5"/><path d="M12 4v12"/></svg>
                   <div class="dz-main">Déposez votre fichier ici ou <u>parcourez vos documents</u></div>
-                  <div class="dz-sub" id="dz-help">PDF, DOC ou DOCX, 10 Mo au maximum</div>
-                  <input type="file" id="file" name="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required>
+                  <div class="dz-sub" id="dz-help">PDF ou DOCX, 10 Mo au maximum, nommé NOM_Prenom_resume</div>
+                  <input type="file" id="file" name="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required>
                 </div>
                 <div class="file-chip" id="file-chip">
                   <svg class="fc-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
@@ -297,7 +303,7 @@
 
             <div class="form-submit">
               <button class="btn btn--primary" type="submit" id="submit-btn">Envoyer ma soumission</button>
-              <span class="note">Les champs marqués d'un astérisque sont obligatoires. Date limite : 10 octobre 2026.</span>
+              <span class="note">Les champs marqués d'un astérisque sont obligatoires. Date limite : 12 octobre 2026.</span>
             </div>
 
           </form>
@@ -308,8 +314,8 @@
         <div class="aside-box aside-box--navy">
           <h3>Dates importantes</h3>
           <ul>
-            <li><strong>Date limite de soumission</strong>10 octobre 2026</li>
-            <li><strong>Notification aux auteurs</strong>10 octobre 2026</li>
+            <li><strong>Date limite de soumission</strong>12 octobre 2026</li>
+            <li><strong>Notification d'acceptation</strong>15 octobre 2026</li>
             <li><strong>Journée scientifique</strong>22 octobre 2026</li>
           </ul>
         </div>
@@ -317,10 +323,10 @@
         <div class="aside-box">
           <h3>Avant d'envoyer</h3>
           <ul>
-            <li>Votre résumé suit le modèle fourni avec l'appel à communication.</li>
+            <li>Le résumé compte entre 250 et 400 mots.</li>
+            <li>Il couvre le contexte, la problématique, la méthode, les résultats et les perspectives.</li>
+            <li>Le fichier est au format PDF ou DOCX, nommé NOM_Prenom_resume, et ne dépasse pas 10 Mo.</li>
             <li>Le titre et les noms des co-auteurs sont définitifs.</li>
-            <li>Le fichier est lisible et ne dépasse pas 10 Mo.</li>
-            <li>L'adresse e-mail saisie est celle que vous consultez.</li>
           </ul>
         </div>
 

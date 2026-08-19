@@ -649,3 +649,4 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
 
 .field input[readonly] { background: var(--surface); color: var(--muted); cursor: not-allowed; }
 .field input[readonly]:focus { border-color: var(--line-strong); box-shadow: none; }
+.counter--over { color: var(--danger); font-weight: 600; }

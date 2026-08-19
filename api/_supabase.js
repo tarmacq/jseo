@@ -16,8 +16,16 @@ const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const TABLE = process.env.SUPABASE_TABLE || 'jseo_submissions';
 const BUCKET = process.env.SUPABASE_BUCKET || 'jseo-resumes';
 
+function missingConfig() {
+  const missing = [];
+  if (!SUPABASE_URL) missing.push('SUPABASE_URL');
+  if (!ANON_KEY) missing.push('SUPABASE_ANON_KEY');
+  if (!SERVICE_KEY) missing.push('SUPABASE_SERVICE_ROLE_KEY');
+  return missing;
+}
+
 function isConfigured() {
-  return Boolean(SUPABASE_URL && ANON_KEY && SERVICE_KEY);
+  return missingConfig().length === 0;
 }
 
 /**
@@ -97,4 +105,12 @@ async function insertSubmission(row) {
   return Array.isArray(rows) ? rows[0] : rows;
 }
 
-module.exports = { isConfigured, verifyAccessToken, uploadFile, insertSubmission, BUCKET, TABLE };
+module.exports = {
+  isConfigured,
+  missingConfig,
+  verifyAccessToken,
+  uploadFile,
+  insertSubmission,
+  BUCKET,
+  TABLE
+};
