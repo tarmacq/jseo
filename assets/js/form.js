@@ -1,4 +1,9 @@
-/* Submission form: client-side validation, file handling, and API call. */
+/* Submission form: client-side validation, file handling, and API call.
+ *
+ * All user-facing strings live in STRINGS below and are selected from the
+ * <html lang> attribute, so the same script drives the French and English
+ * pages without duplication.
+ */
 (function () {
   'use strict';
 
@@ -8,6 +13,82 @@
   var ALLOWED_EXT = ['pdf', 'docx'];
   var ABSTRACT_MIN_WORDS = 250;
   var ABSTRACT_MAX_WORDS = 400;
+
+  var STRINGS = {
+    fr: {
+      lastName: 'Indiquez votre nom.',
+      firstName: 'Indiquez votre prénom.',
+      emailMissing: 'Indiquez votre adresse e-mail.',
+      emailInvalid: 'Cette adresse e-mail ne semble pas valide.',
+      status: 'Sélectionnez votre statut.',
+      institution: 'Indiquez votre établissement ou votre entreprise.',
+      title: 'Indiquez le titre de votre communication.',
+      axis: 'Sélectionnez un axe thématique.',
+      axisOther: 'Précisez la thématique de votre contribution.',
+      keywordsMin: 'Indiquez au moins trois mots-clés séparés par des points-virgules.',
+      keywordsMax: function (n) { return 'Cinq mots-clés au maximum (' + n + ' actuellement).'; },
+      abstractMin: function (n) { return 'Le résumé doit compter au moins ' + ABSTRACT_MIN_WORDS + ' mots (' + n + ' actuellement).'; },
+      abstractMax: function (n) { return 'Le résumé ne doit pas dépasser ' + ABSTRACT_MAX_WORDS + ' mots (' + n + ' actuellement).'; },
+      presentation: 'Choisissez un type de présentation.',
+      language: 'Choisissez la langue de votre communication.',
+      fileMissing: 'Déposez le fichier de votre résumé.',
+      fileFormat: 'Format non accepté. Déposez un fichier PDF ou DOCX.',
+      fileTooBig: function (s) { return 'Fichier trop volumineux' + (s ? ' (' + s + ')' : '') + '. La limite est de 10 Mo.'; },
+      dragDrop: "Le glisser-déposer n'est pas disponible sur ce navigateur. Utilisez le bouton de sélection.",
+      consent: 'Votre accord est nécessaire pour enregistrer la soumission.',
+      captcha: "Confirmez la vérification de sécurité avant d'envoyer.",
+      needAttention: 'Certains champs demandent votre attention. Ils sont signalés ci-dessous.',
+      sessionExpired: 'Votre session a expiré. Reconnectez-vous pour envoyer votre soumission.',
+      sending: 'Envoi en cours',
+      submit: 'Envoyer ma soumission',
+      failIntro: "Votre soumission n'a pas pu être transmise automatiquement.",
+      failAction: function (link) {
+        return 'Envoyez votre résumé directement à ' + link + ' en joignant votre fichier, ou réessayez dans quelques instants.';
+      },
+      mailSubject: 'Soumission JSEO 2026 : ',
+      mailSubjectFallback: 'résumé',
+      units: { b: ' o', k: ' Ko', m: ' Mo' },
+      decimal: ','
+    },
+    en: {
+      lastName: 'Please enter your surname.',
+      firstName: 'Please enter your first name.',
+      emailMissing: 'Please enter your email address.',
+      emailInvalid: 'This email address does not look valid.',
+      status: 'Please select your position.',
+      institution: 'Please enter your institution or company.',
+      title: 'Please enter the title of your contribution.',
+      axis: 'Please select a thematic area.',
+      axisOther: 'Please specify the theme of your contribution.',
+      keywordsMin: 'Please enter at least three keywords separated by semicolons.',
+      keywordsMax: function (n) { return 'Five keywords at most (' + n + ' at present).'; },
+      abstractMin: function (n) { return 'The abstract must be at least ' + ABSTRACT_MIN_WORDS + ' words (' + n + ' at present).'; },
+      abstractMax: function (n) { return 'The abstract must not exceed ' + ABSTRACT_MAX_WORDS + ' words (' + n + ' at present).'; },
+      presentation: 'Please choose a type of presentation.',
+      language: 'Please choose the language of your contribution.',
+      fileMissing: 'Please upload your abstract file.',
+      fileFormat: 'Format not accepted. Please upload a PDF or DOCX file.',
+      fileTooBig: function (s) { return 'File too large' + (s ? ' (' + s + ')' : '') + '. The limit is 10 MB.'; },
+      dragDrop: 'Drag and drop is not available in this browser. Please use the file picker.',
+      consent: 'Your agreement is required before the submission can be recorded.',
+      captcha: 'Please complete the security check before sending.',
+      needAttention: 'Some fields need your attention. They are marked below.',
+      sessionExpired: 'Your session has expired. Please sign in again to send your submission.',
+      sending: 'Sending',
+      submit: 'Send my submission',
+      failIntro: 'Your submission could not be sent automatically.',
+      failAction: function (link) {
+        return 'Please email your abstract directly to ' + link + ' with your file attached, or try again in a moment.';
+      },
+      mailSubject: 'JSEO 2026 submission: ',
+      mailSubjectFallback: 'abstract',
+      units: { b: ' B', k: ' KB', m: ' MB' },
+      decimal: '.'
+    }
+  };
+
+  var LOCALE = (document.documentElement.lang || 'fr').slice(0, 2) === 'en' ? 'en' : 'fr';
+  var T = STRINGS[LOCALE];
 
   function countWords(text) {
     var trimmed = text.trim();
@@ -78,9 +159,9 @@
   /* ----------------------------------------------------------- helpers */
 
   function humanSize(bytes) {
-    if (bytes < 1024) return bytes + ' o';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' Ko';
-    return (bytes / (1024 * 1024)).toFixed(1).replace('.', ',') + ' Mo';
+    if (bytes < 1024) return bytes + T.units.b;
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + T.units.k;
+    return (bytes / (1024 * 1024)).toFixed(1).replace('.', T.decimal) + T.units.m;
   }
 
   function extensionOf(name) {
@@ -170,11 +251,11 @@
     if (!file) return;
 
     if (ALLOWED_EXT.indexOf(extensionOf(file.name)) === -1) {
-      setError('file', 'Format non accepté. Déposez un fichier PDF ou DOCX.');
+      setError('file', T.fileFormat);
       return;
     }
     if (file.size > MAX_BYTES) {
-      setError('file', 'Fichier trop volumineux (' + humanSize(file.size) + '). La limite est de 10 Mo.');
+      setError('file', T.fileTooBig(humanSize(file.size)));
       return;
     }
 
@@ -219,7 +300,7 @@
         fileInput.files = dt.files;
         acceptFile(fileInput.files[0]);
       } catch (err) {
-        setError('file', 'Le glisser-déposer n\'est pas disponible sur ce navigateur. Utilisez le bouton de sélection.');
+        setError('file', T.dragDrop);
       }
     });
 
@@ -233,30 +314,26 @@
   /* ----------------------------------------------------------- validation */
 
   var RULES = [
-    ['lastName', function (v) { return v.trim().length >= 2 || 'Indiquez votre nom.'; }],
-    ['firstName', function (v) { return v.trim().length >= 2 || 'Indiquez votre prénom.'; }],
+    ['lastName', function (v) { return v.trim().length >= 2 || T.lastName; }],
+    ['firstName', function (v) { return v.trim().length >= 2 || T.firstName; }],
     ['email', function (v) {
-      if (!v.trim()) return 'Indiquez votre adresse e-mail.';
-      return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()) || 'Cette adresse e-mail ne semble pas valide.';
+      if (!v.trim()) return T.emailMissing;
+      return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()) || T.emailInvalid;
     }],
-    ['status', function (v) { return !!v || 'Sélectionnez votre statut.'; }],
-    ['institution', function (v) { return v.trim().length >= 2 || 'Indiquez votre établissement ou votre entreprise.'; }],
-    ['title', function (v) { return v.trim().length >= 5 || 'Indiquez le titre de votre communication.'; }],
-    ['axis', function (v) { return !!v || 'Sélectionnez un axe thématique.'; }],
+    ['status', function (v) { return !!v || T.status; }],
+    ['institution', function (v) { return v.trim().length >= 2 || T.institution; }],
+    ['title', function (v) { return v.trim().length >= 5 || T.title; }],
+    ['axis', function (v) { return !!v || T.axis; }],
     ['keywords', function (v) {
       var parts = v.split(';').map(function (s) { return s.trim(); }).filter(Boolean);
-      if (parts.length < 3) return 'Indiquez au moins trois mots-clés séparés par des points-virgules.';
-      if (parts.length > 5) return 'Cinq mots-clés au maximum (' + parts.length + ' actuellement).';
+      if (parts.length < 3) return T.keywordsMin;
+      if (parts.length > 5) return T.keywordsMax(parts.length);
       return true;
     }],
     ['abstract', function (v) {
       var words = countWords(v);
-      if (words < ABSTRACT_MIN_WORDS) {
-        return 'Le résumé doit compter au moins ' + ABSTRACT_MIN_WORDS + ' mots (' + words + ' actuellement).';
-      }
-      if (words > ABSTRACT_MAX_WORDS) {
-        return 'Le résumé ne doit pas dépasser ' + ABSTRACT_MAX_WORDS + ' mots (' + words + ' actuellement).';
-      }
+      if (words < ABSTRACT_MIN_WORDS) return T.abstractMin(words);
+      if (words > ABSTRACT_MAX_WORDS) return T.abstractMax(words);
       return true;
     }]
   ];
@@ -276,40 +353,40 @@
     });
 
     if (form.elements['axis'].value === 'Autre' && !form.elements['axisOther'].value.trim()) {
-      setError('axisOther', 'Précisez la thématique de votre contribution.');
+      setError('axisOther', T.axisOther);
       if (!firstBad) firstBad = form.elements['axisOther'];
     }
 
     if (!form.querySelector('input[name="presentation"]:checked')) {
-      setError('presentation', 'Choisissez un type de présentation.');
+      setError('presentation', T.presentation);
       if (!firstBad) firstBad = form.elements['presentation'][0];
     }
 
     if (!form.querySelector('input[name="language"]:checked')) {
-      setError('language', 'Choisissez la langue de votre communication.');
+      setError('language', T.language);
       if (!firstBad) firstBad = form.elements['language'][0];
     }
 
     var file = fileInput.files[0];
     if (!file) {
-      setError('file', 'Déposez le fichier de votre résumé.');
+      setError('file', T.fileMissing);
       if (!firstBad) firstBad = dropzone;
     } else if (ALLOWED_EXT.indexOf(extensionOf(file.name)) === -1) {
-      setError('file', 'Format non accepté. Déposez un fichier PDF ou DOCX.');
+      setError('file', T.fileFormat);
       if (!firstBad) firstBad = dropzone;
     } else if (file.size > MAX_BYTES) {
-      setError('file', 'Fichier trop volumineux. La limite est de 10 Mo.');
+      setError('file', T.fileTooBig(''));
       if (!firstBad) firstBad = dropzone;
     }
 
     if (!form.elements['consent'].checked) {
-      setError('consent', 'Votre accord est nécessaire pour enregistrer la soumission.');
+      setError('consent', T.consent);
       if (!firstBad) firstBad = form.elements['consent'];
     }
 
     var captcha = form.elements['cf-turnstile-response'];
     if (!captcha || !captcha.value) {
-      setError('captcha', 'Confirmez la vérification de sécurité avant d\'envoyer.');
+      setError('captcha', T.captcha);
       if (!firstBad) firstBad = form.querySelector('.cf-turnstile');
     }
 
@@ -329,15 +406,14 @@
   function setBusy(busy) {
     submitBtn.disabled = busy;
     submitBtn.innerHTML = busy
-      ? '<span class="spinner" aria-hidden="true"></span> Envoi en cours'
-      : 'Envoyer ma soumission';
+      ? '<span class="spinner" aria-hidden="true"></span> ' + T.sending
+      : T.submit;
   }
 
   function mailtoFallback() {
-    var subject = encodeURIComponent('Soumission JSEO 2026 : ' + (form.elements['title'].value || 'résumé'));
-    return '<p>Votre soumission n\'a pas pu être transmise automatiquement.</p>' +
-      '<p>Envoyez votre résumé directement à <a href="mailto:' + STAFF_EMAIL + '?subject=' + subject + '">' +
-      STAFF_EMAIL + '</a> en joignant votre fichier, ou réessayez dans quelques instants.</p>';
+    var subject = encodeURIComponent(T.mailSubject + (form.elements['title'].value || T.mailSubjectFallback));
+    var link = '<a href="mailto:' + STAFF_EMAIL + '?subject=' + subject + '">' + STAFF_EMAIL + '</a>';
+    return '<p>' + T.failIntro + '</p><p>' + T.failAction(link) + '</p>';
   }
 
   form.addEventListener('submit', function (e) {
@@ -346,14 +422,14 @@
 
     var firstBad = validate();
     if (firstBad) {
-      showStatus('err', '<p>Certains champs demandent votre attention. Ils sont signalés ci-dessous.</p>');
+      showStatus('err', '<p>' + T.needAttention + '</p>');
       if (firstBad.focus) firstBad.focus();
       return;
     }
 
     var token = window.JSEOAuth.getToken();
     if (!token) {
-      showStatus('err', '<p>Votre session a expiré. Reconnectez-vous pour envoyer votre soumission.</p>');
+      showStatus('err', '<p>' + T.sessionExpired + '</p>');
       startSession();
       return;
     }
@@ -362,7 +438,11 @@
 
     var data = new FormData(form);
 
-    fetch(ENDPOINT, {
+    // The locale also rides in the query string so the server can answer in
+    // the right language even for errors raised before the body is parsed.
+    var url = ENDPOINT + (ENDPOINT.indexOf('?') === -1 ? '?' : '&') + 'lang=' + LOCALE;
+
+    fetch(url, {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + token },
       body: data
@@ -378,7 +458,7 @@
         if (res.status === 401) {
           setBusy(false);
           resetCaptcha();
-          showStatus('err', '<p>Votre session a expiré. Reconnectez-vous pour envoyer votre soumission.</p>');
+          showStatus('err', '<p>' + T.sessionExpired + '</p>');
           startSession();
           return;
         }

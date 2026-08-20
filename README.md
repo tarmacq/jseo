@@ -14,10 +14,10 @@ de confirmation.
 ## Contenu
 
 ```
-index.html          Accueil
-appel.html          Appel à communication et les quatre axes
-infos.html          Dates, lieu, informations pratiques
-soumission.html     Formulaire de soumission
+index.html          Accueil               en/index.html   Home
+appel.html          Appel à communication en/call.html     Call for papers
+infos.html          Informations          en/info.html     Practical information
+soumission.html     Soumission            en/submit.html   Submission
 
 assets/css/style.css    Feuille de style unique
 assets/js/main.js       Navigation mobile, états des cartes de choix
@@ -34,6 +34,47 @@ server.js           Serveur local (statique + API) pour tester
 Le site s'ouvre tel quel dans un navigateur, mais **le formulaire n'envoie
 rien tant qu'il n'est pas servi par `server.js` ou déployé**, car il a besoin
 de la route `/api/submit`.
+
+---
+
+## Le site bilingue
+
+Le français vit à la racine, l'anglais dans `en/`. Chaque page porte un
+sélecteur FR / EN dans l'en-tête, qui pointe vers son équivalent exact, et une
+balise `hreflang` qui déclare la paire aux moteurs de recherche.
+
+| Français | Anglais |
+| --- | --- |
+| `index.html` | `en/index.html` |
+| `appel.html` | `en/call.html` |
+| `infos.html` | `en/info.html` |
+| `soumission.html` | `en/submit.html` |
+
+Le contenu est écrit en clair dans chaque fichier, sans gabarit ni clés de
+traduction : **une correction de texte doit être reportée dans les deux
+versions.** C'est le prix d'un site que le comité peut modifier directement.
+
+En revanche, tout ce qui est dynamique est mutualisé :
+
+- `assets/js/form.js` porte un dictionnaire `STRINGS` (`fr` et `en`) et
+  choisit la langue d'après l'attribut `lang` de la page. Un même script sert
+  les deux formulaires.
+- `api/submit.js` porte le même principe avec `MSG` et `AUTHOR_MAIL`. La
+  langue arrive par le champ caché `locale` du formulaire, doublée du
+  paramètre `?lang=` pour les erreurs levées avant la lecture du corps.
+- **L'accusé de réception part dans la langue du formulaire utilisé.** Le
+  courriel destiné au comité reste en français et indique, sur une ligne
+  dédiée, la langue dans laquelle le formulaire a été rempli.
+
+Une valeur inconnue retombe systématiquement sur le français.
+
+### Note sur les URL
+
+`cleanUrls` est passé à `false` dans `vercel.json`. Avec `cleanUrls`, la page
+`/en/index.html` est servie sous `/en`, sans barre oblique finale : un lien
+relatif `call.html` s'y résout alors en `/call.html`, donc sur la version
+française. Les URL portent désormais leur extension, et des redirections
+conservent les anciennes adresses sans extension.
 
 ---
 
@@ -170,7 +211,7 @@ script :
 <script>window.JSEO_AUTH_URL = 'https://auth.tarmacq.com/un-autre-chemin';</script>
 ```
 
-Le retour est attendu sous la forme `...soumission.html#access_token=...` (le
+Le retour est attendu sous la forme `...soumission.html#access_token=...` ou `...en/submit.html#access_token=...` (le
 paramètre est aussi accepté en query, et sous le nom `token`). Le jeton est
 retiré de l'URL dès sa lecture et conservé en `sessionStorage`. Si vos noms de
 paramètres diffèrent, ajustez `login()` et `readParams()`.
@@ -278,7 +319,7 @@ validation dans le navigateur et sur le serveur, limite de 10 Mo, extensions
 Les emplacements sont signalés dans les pages par une étiquette orange
 « À compléter ».
 
-- `infos.html` : salle exacte et format présentiel ou hybride.
+- `infos.html` et `en/info.html` : salle exacte et format présentiel ou hybride.
 
 Les comités scientifique et d'organisation ne figurent plus sur le site, à la
 demande du comité. Le balisage `.people` reste disponible dans la feuille de

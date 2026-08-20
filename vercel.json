@@ -1,7 +1,16 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "cleanUrls": true,
+  "cleanUrls": false,
   "trailingSlash": false,
+  "redirects": [
+    { "source": "/appel", "destination": "/appel.html" },
+    { "source": "/infos", "destination": "/infos.html" },
+    { "source": "/soumission", "destination": "/soumission.html" },
+    { "source": "/en", "destination": "/en/index.html" },
+    { "source": "/en/call", "destination": "/en/call.html" },
+    { "source": "/en/info", "destination": "/en/info.html" },
+    { "source": "/en/submit", "destination": "/en/submit.html" }
+  ],
   "functions": {
     "api/submit.js": {
       "maxDuration": 30,

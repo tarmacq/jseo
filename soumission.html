@@ -9,6 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="alternate" hreflang="fr" href="https://jseo.tarmacq.com/soumission.html">
+<link rel="alternate" hreflang="en" href="https://jseo.tarmacq.com/en/submit.html">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -32,6 +34,10 @@
       <a href="appel.html">Appel à communication</a>
       <a href="infos.html">Informations</a>
       <a class="btn btn--primary" href="soumission.html" aria-current="page">Soumettre un résumé</a>
+      <div class="lang-switch" role="group" aria-label="Langue">
+        <a href="soumission.html" aria-current="true" lang="fr">FR</a>
+        <a href="en/submit.html" lang="en">EN</a>
+      </div>
     </nav>
   </div>
 </header>
@@ -105,6 +111,8 @@
           <div class="form-status" id="form-status" role="alert" aria-live="polite"></div>
 
           <form id="submission-form" novalidate>
+
+            <input type="hidden" name="locale" value="fr">
 
             <fieldset class="fieldset">
               <legend><span class="legend-step">01</span>Auteur correspondant</legend>
