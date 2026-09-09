@@ -375,7 +375,7 @@ const AUTHOR_MAIL = {
   fr: (f, reference, e) => ({
     subject: `Accusé de réception de votre soumission ${reference} | ${e.name}`,
     body: `
-    <h1 style="margin:0 0 14px;font-size:21px;color:#0a1b40;">Votre soumission est bien arrivée</h1>
+    <h1 style="margin:0 0 14px;font-size:21px;color:#0a1b40;">Votre soumission est bien reçue</h1>
 
     <p style="margin:0 0 16px;">Bonjour ${escapeHtml(f.firstName)} ${escapeHtml(f.lastName)},</p>
 
